@@ -14,7 +14,7 @@ month_days[2] = 29 if leap_year?(year)
 if day <= 0 || month <= 0 || month_days[month].to_i < day
   puts "Ошибка даты"
 else
-  day_number = month_days[1...month].inject(0, :+) + day
+  day_number = month_days[1...month].sum + day
   puts "Порядковый номер дня с начала года: #{day_number}"
 end
 
