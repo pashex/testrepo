@@ -1,16 +1,14 @@
 class Train
-  class InitializationInvalidError < StandardError; end
+  attr_reader :number, :speed, :current_station, :route
 
-  attr_reader :type, :speed, :carriage_count, :current_station
-
-  TYPES = %w(passenger freight)
-
-  def initialize(number, type, carriage_count)
-    raise InitializationInvalidError.new('Invalid train type. Must be passenger or freight') unless TYPES.include?(type)
-    @number = number
-    @type = type
+  def initialize(number)
+    @number = number.to_s
     @speed = 0
-    @carriage_count = carriage_count
+    @carriages = []
+  end
+
+  def carriage_count
+    @carriages.count
   end
 
   def inc_speed(delta = 1)
@@ -21,42 +19,62 @@ class Train
     @speed = 0
   end
 
-  def attach
-    @carriage_count += 1 if speed == 0
+  def attach(carriage)
+    return if @carriages.include?(carriage)
+    @carriages << carriage if stopped? && right_type_of?(carriage) # вызов метода, который будет определён в подклассах, работает полиморфизм
   end
 
   def detach
-    @carriage_count -= 1 if speed == 0 && @carriage_count > 0
+    @carriages.pop if stopped?
   end
 
   def route=(route)
     return @route if @route == route
     @route = route
-    @current_station.send(self) if @current_station
-    @current_station = @route.first_station
-    @current_station.take(self)
-    @route
+    current_station.leave(self) if current_station
+    if route
+      self.current_station = route.first_station
+      current_station.take(self)
+    else
+      self.current_station = nil
+    end
+    route
   end
 
   def move(direction = 1)
     return unless [-1, 1].include?(direction)
-    if @current_station && @new_station = @route.station_through(direction, @current_station)
-      @current_station.send(self)
-      @current_station = @new_station
-      @current_station.take(self)
-      @current_station
+    if current_station && @new_station = route.station_through(direction, current_station)
+      current_station.leave(self)
+      self.current_station = @new_station
+      current_station.take(self)
+      current_station
     end
   end
 
   def next_station
-    @current_station && @route.station_through(1, @current_station)
+    current_station && route.station_through(1, current_station)
   end
 
   def prev_station
-    @current_station && @route.station_through(-1, @current_station)
+    current_station && route.station_through(-1, current_station)
+  end
+
+  def stopped?
+    speed == 0
   end
 
   def to_s
-    "#{@number.to_s} #{@type}"
+    "#{number} #{type}"
   end
+
+  protected
+
+  # Данный метод будет переопределён в подклассах, в базовом классе он абстрактный.
+  def right_type_of?(carriage)
+    raise 'this method should be overriden in subclasses'
+  end
+
+  private
+
+  attr_writer :current_station
 end

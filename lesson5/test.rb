@@ -1,6 +1,11 @@
-load 'station.rb'
-load 'route.rb'
-load 'train.rb'
+require_relative 'station.rb'
+require_relative 'route.rb'
+require_relative 'train.rb'
+require_relative 'passenger_train.rb'
+require_relative 'cargo_train.rb'
+require_relative 'carriage.rb'
+require_relative 'passenger_carriage.rb'
+require_relative 'cargo_carriage.rb'
 
 stations = %w(Уфа Аша Кропачёво Златоуст Миасс Челябинск).map { |name| Station.new(name) }
 puts stations
@@ -29,29 +34,39 @@ puts route
 route.remove_station(other_station)
 puts route
 
-passenger_trains = [13, 59, 211].map { |number| Train.new(number, 'passenger', rand(15) + 5) }
-freight_trains = [648, 950].map { |number| Train.new(number, 'freight', 30) }
-
-puts passenger_trains
-puts freight_trains
+passenger_trains = [13, 59, 211].map { |number| PassengerTrain.new(number) }
+cargo_trains = [648, 950].map { |number| CargoTrain.new(number) }
 
 train = passenger_trains[0]
-train.route = route
-puts train.inspect
 
 train.inc_speed(10)
 puts train.speed
 
+passenger_carriage = PassengerCarriage.new
+cargo_carriage = CargoCarriage.new
+
 puts train.carriage_count
-train.attach
+train.attach(passenger_carriage)
 puts train.carriage_count
 
 train.stop
-train.attach
+train.attach(passenger_carriage)
 puts train.carriage_count
 
 train.detach
 puts train.carriage_count
+
+train.attach(cargo_carriage)
+puts train.carriage_count
+
+train.detach
+puts train.carriage_count
+
+puts passenger_trains
+puts cargo_trains
+
+train.route = route
+puts train.inspect
 
 puts [train.prev_station, train.current_station, train.next_station].compact.join(', ')
 train.move(-1)
@@ -63,7 +78,7 @@ puts [train.prev_station, train.current_station, train.next_station].compact.joi
 train.move(1)
 puts [train.prev_station, train.current_station, train.next_station].compact.join(', ')
 
-freight_trains.each { |train| train.route = route }
+cargo_trains.each { |train| train.route = route }
 passenger_trains.each { |train| train.route = route }
 
 puts route.first_station.trains
@@ -72,14 +87,14 @@ puts
 puts route.first_station.trains('passenger')
 puts
 
-puts route.first_station.trains('freight')
+puts route.first_station.trains('cargo')
 puts
 
 puts route.first_station.trains_count('passenger')
-puts route.first_station.trains_count('freight')
+puts route.first_station.trains_count('cargo')
 puts
 
-passenger_trains.each { |train| puts "#{train}, #{train.current_station}" }
+passenger_trains.each { |train| puts [train, train.current_station].compact.join(', ') }
 
 
 
