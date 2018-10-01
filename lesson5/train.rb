@@ -1,5 +1,5 @@
 class Train
-  attr_reader :number, :speed, :current_station, :route
+  attr_reader :number, :speed, :current_station, :route, :carriages
 
   def initialize(number)
     @number = number.to_s
@@ -8,7 +8,7 @@ class Train
   end
 
   def carriage_count
-    @carriages.count
+    carriages.count
   end
 
   def inc_speed(delta = 1)
@@ -20,12 +20,12 @@ class Train
   end
 
   def attach(carriage)
-    return if @carriages.include?(carriage)
-    @carriages << carriage if stopped? && right_type_of?(carriage) # вызов метода, который будет определён в подклассах, работает полиморфизм
+    return if carriages.include?(carriage)
+    carriages << carriage if stopped? && right_type_of?(carriage) # вызов метода, который будет определён в подклассах, работает полиморфизм
   end
 
   def detach
-    @carriages.pop if stopped?
+    carriages.pop if stopped?
   end
 
   def route=(route)
@@ -43,9 +43,9 @@ class Train
 
   def move(direction = 1)
     return unless [-1, 1].include?(direction)
-    if current_station && @new_station = route.station_through(direction, current_station)
+    if current_station && new_station = route.station_through(direction, current_station)
       current_station.leave(self)
-      self.current_station = @new_station
+      self.current_station = new_station
       current_station.take(self)
       current_station
     end
@@ -61,10 +61,6 @@ class Train
 
   def stopped?
     speed == 0
-  end
-
-  def to_s
-    "#{number} #{type}"
   end
 
   protected

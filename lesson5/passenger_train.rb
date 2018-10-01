@@ -6,6 +6,6 @@ class PassengerTrain < Train
   private
 
   def right_type_of?(carriage)
-    carriage.is_a? PassengerCarriage
+    carriage.type == type
   end
 end

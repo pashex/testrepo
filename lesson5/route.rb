@@ -6,7 +6,7 @@ class Route
   end
 
   def first_station
-    @stations.first
+    stations.first
   end
 
   def last_station
@@ -14,16 +14,16 @@ class Route
   end
 
   def add_station_at(position, station)
-    return if position < 1 || position > stations.count - 1
-    @stations.insert(position, station) unless stations.include?(station)
+    return if position < 2 || position > stations.count
+    stations.insert(position - 1, station) unless stations.include?(station)
   end
 
   def remove_station(station)
-    @stations.delete(station) if stations[1..-2].include?(station)
+    stations.delete(station) if stations[1..-2].include?(station)
   end
 
   def show_stations
-    puts stations
+    puts stations.map(&:name).join(', ')
   end
 
   def station_through(step, station)
@@ -32,7 +32,4 @@ class Route
     stations[new_station_index] unless new_station_index < 0
   end
 
-  def to_s
-    stations.join(', ')
-  end
 end

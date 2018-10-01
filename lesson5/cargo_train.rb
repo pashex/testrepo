@@ -6,6 +6,6 @@ class CargoTrain < Train
   private
   # Данный метод не должен вызываться извне, служит лишь для определения правильного типа вагона внутри класса
   def right_type_of?(carriage)
-    carriage.is_a? CargoCarriage
+    carriage.type == type
   end
 end

@@ -26,7 +26,4 @@ class Station
     trains(type).count
   end
 
-  def to_s
-    name
-  end
 end
