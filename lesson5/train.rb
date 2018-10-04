@@ -21,7 +21,7 @@ class Train
 
   def attach(carriage)
     return if carriages.include?(carriage)
-    carriages << carriage if stopped? && right_type_of?(carriage) # вызов метода, который будет определён в подклассах, работает полиморфизм
+    carriages << carriage if stopped? && right_type_of?(carriage)
   end
 
   def detach
@@ -63,14 +63,11 @@ class Train
     speed == 0
   end
 
-  protected
-
-  # Данный метод будет переопределён в подклассах, в базовом классе он абстрактный.
-  def right_type_of?(carriage)
-    raise 'this method should be overriden in subclasses'
-  end
-
   private
 
   attr_writer :current_station
+
+  def right_type_of?(carriage)
+    carriage.type == type
+  end
 end
