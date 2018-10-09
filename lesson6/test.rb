@@ -1,3 +1,5 @@
+require_relative 'manufacturer.rb'
+require_relative 'instance_counter.rb'
 require_relative 'station.rb'
 require_relative 'route.rb'
 require_relative 'train.rb'
@@ -96,6 +98,29 @@ puts
 puts route.first_station.trains_count('passenger')
 puts route.first_station.trains_count('cargo')
 puts
+
+train1 = Train.find('211')
+puts train1.number
+train1.mfr_name = "УралВагонЗавод"
+puts train1.mfr_name
+
+train2 = Train.find('13')
+train2.mfr_name = "УралВагонЗавод-2"
+puts train2.mfr_name
+puts train1.mfr_name
+
+carriage = PassengerCarriage.new('У1')
+carriage.mfr_name = "УралВагонЗавод"
+puts carriage.mfr_name
+
+all_stations = Station.all
+puts "Все созданные станции: #{all_stations.map(&:name).join(', ')}"
+
+puts "Количество созданных экземлпяров класса Train: #{Train.instances}"
+puts "Количество созданных экземлпяров класса PassengerTrain: #{PassengerTrain.instances}"
+puts "Количество созданных экземлпяров класса CargoTrain: #{CargoTrain.instances}"
+puts "Количество созданных экземлпяров класса Station: #{Station.instances}"
+puts "Количество созданных экземлпяров класса Route: #{Route.instances}"
 
 
 
