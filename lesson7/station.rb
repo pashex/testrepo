@@ -1,5 +1,8 @@
 class Station
   include InstanceCounter
+  include Validation
+
+  NAME_FORMAT = /\A[а-яё]{3,}([\-\s]?[а-яё]{3,})?(\s\d)?\z/i
 
   attr_reader :name
 
@@ -10,8 +13,9 @@ class Station
   end
 
   def initialize(name)
-    @name = name
+    @name = name.to_s.strip
     @trains = []
+    validate!
     @@objects << self
     register_instance
   end
@@ -36,4 +40,11 @@ class Station
     trains(type).count
   end
 
+  private
+
+  def validate!
+    raise Validation::Error.new('Название станции не может быть пустым') if name == ''
+    raise Validation::Error.new('Название станции должно быть более 1-го символа') unless name.length > 1
+    raise Validation::Error.new('Название станции в неверном формате') unless name =~ NAME_FORMAT
+  end
 end

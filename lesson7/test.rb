@@ -1,3 +1,4 @@
+require_relative 'validation.rb'
 require_relative 'manufacturer.rb'
 require_relative 'instance_counter.rb'
 require_relative 'station.rb'
@@ -36,16 +37,16 @@ route.show_stations
 route.remove_station(other_station)
 route.show_stations
 
-passenger_trains = [13, 59, 211].map { |number| PassengerTrain.new(number) }
-cargo_trains = [648, 950].map { |number| CargoTrain.new(number) }
+passenger_trains = ['ааа-13', '123-59', 'ббб21'].map { |number| PassengerTrain.new(number) }
+cargo_trains = ['12648', '123-aa'].map { |number| CargoTrain.new(number) }
 
 train = passenger_trains[0]
 
 train.inc_speed(10)
 puts train.speed
 
-passenger_carriage = PassengerCarriage.new('P1')
-cargo_carriage = CargoCarriage.new('T1')
+passenger_carriage = PassengerCarriage.new('ABP1')
+cargo_carriage = CargoCarriage.new('ABT1')
 
 puts train.carriage_count
 train.attach(passenger_carriage)
@@ -99,17 +100,17 @@ puts route.first_station.trains_count('passenger')
 puts route.first_station.trains_count('cargo')
 puts
 
-train1 = Train.find('211')
+train1 = Train.find('ааа-13')
 puts train1.number
 train1.mfr_name = "УралВагонЗавод"
 puts train1.mfr_name
 
-train2 = Train.find('13')
+train2 = Train.find('123-aa')
 train2.mfr_name = "УралВагонЗавод-2"
 puts train2.mfr_name
 puts train1.mfr_name
 
-carriage = PassengerCarriage.new('У1')
+carriage = PassengerCarriage.new('ABУ1')
 carriage.mfr_name = "УралВагонЗавод"
 puts carriage.mfr_name
 

@@ -1,6 +1,9 @@
 class Train
   include Manufacturer
   include InstanceCounter
+  include Validation
+
+  NUMBER_FORMAT = /\A[а-яa-z\d]{3}-?[а-яa-z\d]{2}\z/i
 
   attr_reader :number, :speed, :current_station, :route, :carriages
 
@@ -11,9 +14,10 @@ class Train
   end
 
   def initialize(number)
-    @number = number.to_s
+    @number = number.to_s.strip
     @speed = 0
     @carriages = []
+    validate!
     @@objects << self
     register_instance
   end
@@ -80,5 +84,11 @@ class Train
 
   def right_type_of?(carriage)
     carriage.type == type
+  end
+
+  def validate!
+    raise Validation::Error.new('Номер поезда не может быть пустым') if number == ''
+    raise Validation::Error.new('Номер поезда в неверном формате. Допустимый формат: три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса') unless number =~ NUMBER_FORMAT
+    raise Validation::Error.new("Поезд с номером #{number} уже существует") if self.class.find(number)
   end
 end

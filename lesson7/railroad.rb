@@ -166,9 +166,11 @@ class Railroad
   def create_train(type)
     puts "Номер поезда:"
     number = gets.chomp
-    return puts("Поезд #{number} уже есть") if find_train(number)
     @trains << Object.const_get("#{type}Train").new(number)
     puts "Поезд #{number} (#{type}) успешно создан"
+  rescue Validation::Error => e
+    puts e.message
+    retry
   end
 
   def delete_train
