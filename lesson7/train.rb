@@ -87,8 +87,8 @@ class Train
   end
 
   def validate!
-    raise Validation::Error.new('Номер поезда не может быть пустым') if number == ''
-    raise Validation::Error.new('Номер поезда в неверном формате. Допустимый формат: три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса') unless number =~ NUMBER_FORMAT
+    raise Validation::Error.new('Номер поезда не может быть пустым') if number.length.zero?
+    raise Validation::Error.new('Номер поезда в неверном формате. Допустимый формат: три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса') if number !~ NUMBER_FORMAT
     raise Validation::Error.new("Поезд с номером #{number} уже существует") if self.class.find(number)
   end
 end

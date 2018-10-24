@@ -43,8 +43,8 @@ class Station
   private
 
   def validate!
-    raise Validation::Error.new('Название станции не может быть пустым') if name == ''
-    raise Validation::Error.new('Название станции должно быть более 1-го символа') unless name.length > 1
-    raise Validation::Error.new('Название станции в неверном формате') unless name =~ NAME_FORMAT
+    raise Validation::Error.new('Название станции не может быть пустым') if name.length.zero?
+    raise Validation::Error.new('Название станции должно быть не менее 2-х символов') if name.length < 2
+    raise Validation::Error.new('Название станции в неверном формате') if name !~ NAME_FORMAT
   end
 end
