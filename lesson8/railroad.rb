@@ -32,11 +32,11 @@ class Railroad
     route_3 = Route.new(stations_route_1.last, stations_route_2.last)
     stations_route_3.each_with_index { |station, index| route_3.add_station_at(index + 1, station) }
 
-    passenger_trains = [13, 59, 211, 456].map { |number| PassengerTrain.new(number) }
-    cargo_trains = [648, 950].map { |number| CargoTrain.new(number) }
+    passenger_trains = ['РЖД-13', 'РЖД-59', 'РЖД-21', 'РЖД-56'].map { |number| PassengerTrain.new(number) }
+    cargo_trains = ['648-56', '950-23'].map { |number| CargoTrain.new(number) }
 
-    passenger_carriages = %w(П1 П2 П3 П4 П5).map { |uid| PassengerCarriage.new(uid) }
-    cargo_carriages = %w(Т1 Т2 Т3 Т4).map { |uid| CargoCarriage.new(uid) }
+    passenger_carriages = %w(ПВ1 ПВ2 ПВ3 ПВ4 ПВ5).map { |uid| PassengerCarriage.new(uid, 36) }
+    cargo_carriages = %w(ТВ1 ТВ2 ТВ3 ТВ4).map { |uid| CargoCarriage.new(uid, 100) }
 
     passenger_trains.each_with_index { |train, index| train.attach(passenger_carriages[index]) }
     cargo_trains.each_with_index { |train, index| train.attach(cargo_carriages[index]) }
@@ -59,8 +59,9 @@ class Railroad
       none: [
         { choice: 1, type: :stations, name: 'Работа со станциями' },
         { choice: 2, type: :trains, name: 'Работа с поездами' },
-        { choice: 3, type: :routes, name: 'Работа с маршрутами' },
-        { choice: 4, type: :seed, name: 'Сброс к сид-данным (загрузить шаблон)' }
+        { choice: 3, type: :carriages, name: 'Работа с вагонами' },
+        { choice: 4, type: :routes, name: 'Работа с маршрутами' },
+        { choice: 5, type: :seed, name: 'Сброс к сид-данным (загрузить шаблон)' }
       ],
       stations: [
         { choice: 1, type: :stations, action: :index, name: 'Посмотреть все станции' },
@@ -71,9 +72,18 @@ class Railroad
       trains: [
         { choice: 1, type: :trains, action: :index, name: 'Посмотреть все поезда' },
         { choice: 2, type: :train, action: :create, name: 'Создать новый поезд' },
-        { choice: 3, type: :train, action: :update, name: 'Изменить поезд' },
+        { choice: 3, type: :train, action: :show, name: 'Посмотреть список вагонов поезда' },
         { choice: 4, type: :train, action: :control, name: 'Управлять поездом' },
         { choice: 5, type: :train, action: :delete, name: 'Удалить поезд' }
+      ],
+      carriages: [
+        { choice: 1, type: :carriage, action: :create_passenger, name: 'Создать пассажирский вагон' },
+        { choice: 2, type: :carriage, action: :create_cargo, name: 'Создать товарный вагон' },
+        { choice: 3, type: :carriage, action: :delete, name: 'Удалить свободный вагон' },
+        { choice: 4, type: :carriage, action: :add, name: 'Добавить вагон в конец поезда' },
+        { choice: 5, type: :carriage, action: :remove, name: 'Отцепить последний вагон поезда' },
+        { choice: 6, type: :carriage, action: :take_seat, name: 'Занять место в пассажирском вагоне' },
+        { choice: 7, type: :carriage, action: :take_volume, name: 'Занять объём в товарном вагоне' }
       ],
       routes: [
         { choice: 1, type: :routes, action: :index, name: 'Посмотреть все маршруты' },
@@ -88,13 +98,6 @@ class Railroad
       create_train: [
         { choice: 1, type: :train, action: :create_passenger, name: 'Создать пассажирский поезд' },
         { choice: 2, type: :train, action: :create_cargo, name: 'Создать грузовой поезд' }
-      ],
-      update_train: [
-        { choice: 1, type: :train, action: :create_passenger_carriage, name: 'Создать пассажирский вагон' },
-        { choice: 2, type: :train, action: :create_cargo_carriage, name: 'Создать товарный вагон' },
-        { choice: 3, type: :train, action: :delete_carriage, name: 'Удалить свободный вагон' },
-        { choice: 4, type: :train, action: :add_carriage, name: 'Добавить вагон в конец' },
-        { choice: 5, type: :train, action: :remove_carriage, name: 'Отцепить последний вагон' }
       ],
       control_train: [
         { choice: 1, type: :train, action: :change_route, name: 'Назначить маршрут' },
@@ -137,8 +140,7 @@ class Railroad
 
   def show_station
     return unless station = get_station
-    puts "Пассажирские поезда на станции: #{station.trains('passenger').map(&:number).join(', ')}"
-    puts "Грузовые поезда на станции: #{station.trains('cargo').map(&:number).join(', ')}"
+    station.each_train { |train| puts "Номер: #{train.number}; Тип: #{train.type}; Кол-во вагонов: #{train.carriage_count}" }
   end
 
   def delete_station
@@ -173,6 +175,18 @@ class Railroad
     retry
   end
 
+  def show_train
+    return unless train = get_train
+    train.each_carriage do |carriage|
+      case carriage.type
+      when 'passenger'
+        puts "Номер: #{carriage.uid}; Тип: #{carriage.type}; Кол-во занятых мест: #{carriage.taken_seats}; Кол-во свободных мест: #{carriage.free_seats}"
+      when 'cargo'
+        puts "Номер: #{carriage.uid}; Тип: #{carriage.type}; Занятый объём: #{carriage.taken_volume}; Свободный объём: #{carriage.free_volume}"
+      end
+    end
+  end
+
   def delete_train
     return unless train = get_train
     return puts("Поезд #{train.number} стоит на станции. Для удаления, необходимо его предварительно снять с маршрута") if train.current_station
@@ -195,23 +209,33 @@ class Railroad
     puts "Поезд #{train.number} снят с маршрута"
   end
 
-  def create_passenger_carriage_train
-    create_carriage('Passenger')
-  end
-
-  def create_cargo_carriage_train
-    create_carriage('Cargo')
-  end
-
-  def create_carriage(type)
+  def create_passenger_carriage
     puts "Уникальный идентификатор вагона:"
     uid = gets.chomp
     return puts("Вагон #{uid} уже есть") if find_carriage(uid)
-    @carriages << Object.const_get("#{type}Carriage").new(uid)
-    puts "Вагон с идентификатором #{uid} (#{type}) успешно создан и готов к подцепке"
+    puts "Количество мест в вагоне:"
+    seats = gets.chomp
+    @carriages << PassengerCarriage.new(uid, seats)
+    puts "Пассажирский вагон с идентификатором #{uid} успешно создан и готов к подцепке"
+  rescue Validation::Error => e
+    puts e.message
+    retry
   end
 
-  def delete_carriage_train
+  def create_cargo_carriage
+    puts "Уникальный идентификатор вагона:"
+    uid = gets.chomp
+    return puts("Вагон #{uid} уже есть") if find_carriage(uid)
+    puts "Объем товарного вагона:"
+    volume = gets.chomp
+    @carriages << CargoCarriage.new(uid, volume)
+    puts "Товарный вагон с идентификатором #{uid} успешно создан и готов к подцепке"
+  rescue Validation::Error => e
+    puts e.message
+    retry
+  end
+
+  def delete_carriage
     return unless carriage = get_carriage
     train = train_with_carriage(carriage)
     return puts("Вагон #{carriage.uid} в составе поезда #{train.number}. Для удаления, необходимо его предварительно отцепить") if train
@@ -219,7 +243,7 @@ class Railroad
     puts "Вагон #{carriage.uid} удалён"
   end
 
-  def add_carriage_train
+  def add_carriage
     puts "Свободные вагоны для подцепки: #{free_carriages.map(&:uid).join(', ')}"
     return unless carriage = get_carriage
     train = train_with_carriage(carriage)
@@ -233,7 +257,7 @@ class Railroad
     end
   end
 
-  def remove_carriage_train
+  def remove_carriage
     return unless train = get_train
     return puts("У поезда #{train.number} нет вагонов") if train.carriage_count.zero?
     if carriage = train.detach
@@ -241,6 +265,26 @@ class Railroad
     else
       puts "Не удалось отцепить вагон. Возможно, поезд в движении"
     end
+  end
+
+  def take_seat_carriage
+    return unless carriage = get_carriage
+    return puts("Вагон #{uid} не является пассажирским") unless carriage.type == 'passenger'
+    carriage.take_seat!
+    puts "Место успешно занято. Количество свободных мест вагона - #{carriage.free_seats}"
+  rescue Validation::Error => e
+    puts e.message
+  end
+
+  def take_volume_carriage
+    return unless carriage = get_carriage
+    return puts("Вагон #{uid} не является товарным") unless carriage.type == 'cargo'
+    puts "Какой объем занять (доступно #{carriage.free_volume}):"
+    use_volume = gets.chomp.to_f
+    carriage.take_volume!(use_volume)
+    puts "Объём успешно занят. Доступный объём - #{carriage.free_volume}"
+  rescue Validation::Error => e
+    puts e.message
   end
 
   def move_forward_train

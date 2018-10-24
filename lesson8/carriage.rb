@@ -13,6 +13,6 @@ class Carriage
 
   def validate!
     raise Validation::Error.new('Идентификатор вагона не может быть пустым') if uid.length.zero?
-    raise Validation::Error.new('Идентификатор должен быть более 3-х символов') if uid.length < 4
+    raise Validation::Error.new('Идентификатор должен быть не менее 3-х символов') if uid.length < 3
   end
 end

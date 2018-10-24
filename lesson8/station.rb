@@ -40,6 +40,10 @@ class Station
     trains(type).count
   end
 
+  def each_train
+    @trains.each { |train| yield train }
+  end
+
   private
 
   def validate!

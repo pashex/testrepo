@@ -45,8 +45,8 @@ train = passenger_trains[0]
 train.inc_speed(10)
 puts train.speed
 
-passenger_carriage = PassengerCarriage.new('ABP1')
-cargo_carriage = CargoCarriage.new('ABT1')
+passenger_carriage = PassengerCarriage.new('ABP1', 36)
+cargo_carriage = CargoCarriage.new('ABT1', 100)
 
 puts train.carriage_count
 train.attach(passenger_carriage)
@@ -110,7 +110,7 @@ train2.mfr_name = "УралВагонЗавод-2"
 puts train2.mfr_name
 puts train1.mfr_name
 
-carriage = PassengerCarriage.new('ABУ1')
+carriage = PassengerCarriage.new('ABУ1', 54)
 carriage.mfr_name = "УралВагонЗавод"
 puts carriage.mfr_name
 

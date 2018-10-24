@@ -78,6 +78,10 @@ class Train
     speed == 0
   end
 
+  def each_carriage
+    @carriages.each { |carriage| yield carriage }
+  end
+
   private
 
   attr_writer :current_station
