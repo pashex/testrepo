@@ -1,22 +1,27 @@
+# Railroad station
 class Station
   include InstanceCounter
   include Validation
 
   NAME_FORMAT = /\A[а-яё]{3,}([\-\s]?[а-яё]{3,})?(\s\d)?\z/i
+  MSG = { empty_name: 'Название станции не может быть пустым',
+          error_length: 'Название станции должно быть не менее 2-х символов',
+          invalid_format: 'Название станции в неверном формате' }.freeze
 
   attr_reader :name
 
-  @@objects = []
+  @objects = []
 
-  def self.all
-    @@objects
+  class << self
+    attr_reader :objects
+    alias all objects
   end
 
   def initialize(name)
     @name = name.to_s.strip
     @trains = []
     validate!
-    @@objects << self
+    self.class.objects << self
     register_instance
   end
 
@@ -47,8 +52,8 @@ class Station
   private
 
   def validate!
-    raise Validation::Error.new('Название станции не может быть пустым') if name.length.zero?
-    raise Validation::Error.new('Название станции должно быть не менее 2-х символов') if name.length < 2
-    raise Validation::Error.new('Название станции в неверном формате') if name !~ NAME_FORMAT
+    validation_fail!(MSG[:empty_name]) if name.length.zero?
+    validation_fail!(MSG[:error_length]) if name.length < 2
+    validation_fail!(MSG[:invalid_format]) if name !~ NAME_FORMAT
   end
 end

@@ -1,5 +1,9 @@
+# Railroad cargo carriage
 class CargoCarriage < Carriage
+  MSG = { invalid_volume: 'Объем должен быть больше 4 и не более 1000' }.freeze
+
   attr_reader :volume, :taken_volume
+  alias taken taken_volume
 
   def initialize(uid, volume)
     @volume = volume.to_f
@@ -12,13 +16,17 @@ class CargoCarriage < Carriage
   end
 
   def take_volume!(use_volume)
-    raise Validation::Error.new('Нельзя занять больше, чем объём вагона') if taken_volume + use_volume > volume
+    if taken_volume + use_volume > volume
+      raise Validation::Error, 'Нельзя занять больше, чем объём вагона'
+    end
+
     self.taken_volume += use_volume
   end
 
   def free_volume
     volume - taken_volume
   end
+  alias free free_volume
 
   private
 
@@ -26,6 +34,6 @@ class CargoCarriage < Carriage
 
   def validate!
     super
-    raise Validation::Error.new('Объем вагона должен быть не менее 5 и не более 1000') if volume < 5 || volume > 1000
+    validation_fail!(MSG[:invalid_volume]) if volume < 5 || volume > 1000
   end
 end

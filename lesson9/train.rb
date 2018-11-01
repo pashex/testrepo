@@ -1,16 +1,34 @@
+# Railroad train
 class Train
   include Manufacturer
   include InstanceCounter
   include Validation
 
   NUMBER_FORMAT = /\A[а-яa-z\d]{3}-?[а-яa-z\d]{2}\z/i
+  MSG = { empty_number: 'Номер поезда не может быть пустым',
+          invalid_format: 'Номер поезда в неверном формате. Допустимый формат:\
+            три буквы или цифры в любом порядке, необязательный дефис \
+            (может быть, а может нет) и еще 2 буквы или цифры после дефиса',
+          exists: 'Поезд с таким номером уже существует',
+          exist_carriage: 'Данный вагон уже есть в поезде',
+          other_attached: 'Вагон прицеплен к другому поезду',
+          invalid_type: 'Неверный тип вагона',
+          error_running: 'Ошибка прицепки/отцепки. Поезд в движении' }.freeze
 
   attr_reader :number, :speed, :current_station, :route, :carriages
 
-  @@objects = []
+  @objects = []
 
-  def self.find(number)
-    @@objects.find { |train| train.number == number }
+  class << self
+    attr_reader :objects
+
+    def find(number)
+      objects.find { |train| train.number == number }
+    end
+
+    def find_attached(carriage)
+      objects.find { |train| train.carriages.include?(carriage) }
+    end
   end
 
   def initialize(number)
@@ -18,7 +36,7 @@ class Train
     @speed = 0
     @carriages = []
     validate!
-    @@objects << self
+    self.class.objects << self
     register_instance
   end
 
@@ -34,36 +52,44 @@ class Train
     @speed = 0
   end
 
-  def attach(carriage)
-    return if carriages.include?(carriage)
-    carriages << carriage if stopped? && right_type_of?(carriage)
+  def attach!(carriage)
+    validation_fail!(MSG[:exist_carriage]) if carriages.include?(carriage)
+    validation_fail!(MSG[:other_attached]) if self.class.find_attached(carriage)
+    validation_fail!(MSG[:invalid_type]) unless right_type_of?(carriage)
+    validate_running!
+
+    carriages << carriage
   end
 
-  def detach
-    carriages.pop if stopped?
+  def detach!
+    validate_running!
+    carriages.pop
   end
 
   def route=(route)
-    return @route if @route == route
-    @route = route
-    current_station.leave(self) if current_station
-    if route
-      self.current_station = route.first_station
-      current_station.take(self)
-    else
-      self.current_station = nil
+    unless @route == route
+      current_station.leave(self) if current_station
+      if route
+        self.current_station = route.first_station
+        current_station.take(self)
+      else
+        self.current_station = nil
+      end
     end
-    route
+    @route = route
   end
 
   def move(direction = 1)
     return unless [-1, 1].include?(direction)
-    if current_station && new_station = route.station_through(direction, current_station)
-      current_station.leave(self)
-      self.current_station = new_station
-      current_station.take(self)
-      current_station
-    end
+    return unless current_station
+
+    new_station = route.station_through(direction, current_station)
+    return unless new_station
+
+    current_station.leave(self)
+    self.current_station = new_station
+    current_station.take(self)
+    current_station
   end
 
   def next_station
@@ -75,7 +101,7 @@ class Train
   end
 
   def stopped?
-    speed == 0
+    speed.zero?
   end
 
   def each_carriage
@@ -91,8 +117,12 @@ class Train
   end
 
   def validate!
-    raise Validation::Error.new('Номер поезда не может быть пустым') if number.length.zero?
-    raise Validation::Error.new('Номер поезда в неверном формате. Допустимый формат: три буквы или цифры в любом порядке, необязательный дефис (может быть, а может нет) и еще 2 буквы или цифры после дефиса') if number !~ NUMBER_FORMAT
-    raise Validation::Error.new("Поезд с номером #{number} уже существует") if self.class.find(number)
+    validation_fail!(MSG[:empty_number]) if number.length.zero?
+    validation_fail!(MSG[:invalid_format]) if number !~ NUMBER_FORMAT
+    validation_fail!(MSG[:exists]) if self.class.find(number)
+  end
+
+  def validate_running!
+    validation_fail!(MSG[:error_running]) unless stopped?
   end
 end

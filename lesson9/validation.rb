@@ -1,3 +1,4 @@
+# Validation methods for classes
 module Validation
   class Error < StandardError; end
 
@@ -9,8 +10,11 @@ module Validation
     true
   end
 
+  def validation_fail!(msg)
+    raise Validation::Error, msg
+  end
+
   protected
 
-  def validate!
-  end
+  def validate!; end
 end

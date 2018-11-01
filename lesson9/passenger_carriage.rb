@@ -1,5 +1,11 @@
+# Railroad passenger carriage
 class PassengerCarriage < Carriage
+  MSG = {
+    invalid_seats: 'Количество мест должно быть больше 3 и не более 100'
+  }.freeze
+
   attr_reader :seats, :taken_seats
+  alias taken taken_seats
 
   def initialize(uid, seats)
     @seats = seats.to_i
@@ -12,13 +18,17 @@ class PassengerCarriage < Carriage
   end
 
   def take_seat!
-    raise Validation::Error.new('Нельзя занять место. Свободных мест нет') if free_seats.zero?
+    if free_seats.zero?
+      raise Validation::Error, 'Нельзя занять место. Свободных мест нет'
+    end
+
     self.taken_seats += 1
   end
 
   def free_seats
     seats - taken_seats
   end
+  alias free free_seats
 
   private
 
@@ -26,7 +36,6 @@ class PassengerCarriage < Carriage
 
   def validate!
     super
-    raise Validation::Error.new('Количество мест в вагоне должно быть не менее 4 и не более 100') if seats < 4 || seats > 100
+    validation_fail!(MSG[:invalid_seats]) if seats < 4 || seats > 100
   end
-
 end

@@ -9,6 +9,12 @@ require_relative 'cargo_train.rb'
 require_relative 'carriage.rb'
 require_relative 'passenger_carriage.rb'
 require_relative 'cargo_carriage.rb'
+require_relative 'menu.rb'
+require_relative 'seeder.rb'
+require_relative 'station_actions.rb'
+require_relative 'train_actions.rb'
+require_relative 'route_actions.rb'
+require_relative 'carriage_actions.rb'
 require_relative 'railroad.rb'
 
 railroad = Railroad.new

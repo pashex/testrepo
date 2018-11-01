@@ -1,8 +1,10 @@
+# Module for count instances of classes
 module InstanceCounter
   def self.included(base)
     base.extend ClassMethods
   end
 
+  # class methods
   module ClassMethods
     def instances
       @instances || 0
@@ -21,5 +23,4 @@ module InstanceCounter
   def register_instance
     self.class.send :register_instance
   end
-
 end
