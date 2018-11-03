@@ -1,3 +1,5 @@
+require_relative 'dummy_classes.rb'
+require_relative 'accessors.rb'
 require_relative 'validation.rb'
 require_relative 'manufacturer.rb'
 require_relative 'instance_counter.rb'
@@ -9,6 +11,7 @@ require_relative 'cargo_train.rb'
 require_relative 'carriage.rb'
 require_relative 'passenger_carriage.rb'
 require_relative 'cargo_carriage.rb'
+require_relative 'history_object.rb'
 
 stations = %w[Уфа Аша Кропачёво Златоуст Миасс Челябинск].map do |name|
   Station.new(name)
@@ -136,3 +139,32 @@ puts "Количество экземлпяров класса PassengerTrain: #
 puts "Количество экземлпяров класса CargoTrain: #{CargoTrain.instances}"
 puts "Количество экземлпяров класса Station: #{Station.instances}"
 puts "Количество экземлпяров класса Route: #{Route.instances}"
+
+puts '============================================================='
+
+history_object = HistoryObject.new
+puts history_object.a.inspect
+puts history_object.b.inspect
+
+puts history_object.a_history.inspect
+puts history_object.b_history.inspect
+
+history_object.a = 5
+puts history_object.a.inspect
+puts history_object.a_history.inspect
+history_object.a = 6
+puts history_object.a_history.inspect
+history_object.a = 7
+puts history_object.a_history.inspect
+history_object.b = 1
+puts history_object.b_history.inspect
+
+puts history_object.c.inspect
+history_object.c = 'string'
+puts history_object.c.inspect
+
+begin
+  history_object.c = 5
+rescue Accessors::TypeError => e
+  puts "Error: #{e}"
+end

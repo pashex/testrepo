@@ -1,11 +1,9 @@
 # Railroad passenger carriage
 class PassengerCarriage < Carriage
-  MSG = {
-    invalid_seats: 'Количество мест должно быть больше 3 и не более 100'
-  }.freeze
-
   attr_reader :seats, :taken_seats
   alias taken taken_seats
+
+  validate :seats, :range, 4, 100
 
   def initialize(uid, seats)
     @seats = seats.to_i
@@ -33,9 +31,4 @@ class PassengerCarriage < Carriage
   private
 
   attr_writer :taken_seats
-
-  def validate!
-    super
-    validation_fail!(MSG[:invalid_seats]) if seats < 4 || seats > 100
-  end
 end

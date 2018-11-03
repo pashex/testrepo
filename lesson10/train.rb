@@ -5,17 +5,18 @@ class Train
   include Validation
 
   NUMBER_FORMAT = /\A[а-яa-z\d]{3}-?[а-яa-z\d]{2}\z/i
-  MSG = { empty_number: 'Номер поезда не может быть пустым',
-          invalid_format: 'Номер поезда в неверном формате. Допустимый формат:\
-            три буквы или цифры в любом порядке, необязательный дефис \
-            (может быть, а может нет) и еще 2 буквы или цифры после дефиса',
-          exists: 'Поезд с таким номером уже существует',
+  MSG = { exists: 'Поезд с таким номером уже существует',
           exist_carriage: 'Данный вагон уже есть в поезде',
           other_attached: 'Вагон прицеплен к другому поезду',
           invalid_type: 'Неверный тип вагона',
           error_running: 'Ошибка прицепки/отцепки. Поезд в движении' }.freeze
 
   attr_reader :number, :speed, :current_station, :route, :carriages
+
+  validate :number, :presence
+  validate :number, :format, NUMBER_FORMAT
+  validate :route, :type, Route
+  validate :current_station, :type, Station
 
   @objects = []
 
@@ -117,8 +118,7 @@ class Train
   end
 
   def validate!
-    validation_fail!(MSG[:empty_number]) if number.length.zero?
-    validation_fail!(MSG[:invalid_format]) if number !~ NUMBER_FORMAT
+    super
     validation_fail!(MSG[:exists]) if self.class.find(number)
   end
 

@@ -13,6 +13,8 @@ module StationActions
 
     stations << Station.new(name)
     puts "Станция #{name} успешно создана"
+  rescue Validation::Error => e
+    puts e.message
   end
 
   def show_station

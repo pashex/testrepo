@@ -78,7 +78,7 @@ module TrainActions
 
     if train.move(1)
       puts "Поезд #{train.number} - перешёл на \
-        станцию #{train.current_station.name}"
+станцию #{train.current_station.name}"
     else
       puts "Поезд уже на конечной станции (#{train.current_station.name})"
     end

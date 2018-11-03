@@ -4,7 +4,6 @@ class Route
   include Validation
 
   MSG = {
-    invalid_nodes: 'Узлы маршрута должны быть объектами класса Station',
     same_nodes: 'Начало и конец маршрута не могут совпадать',
     err_remove: 'Станции нет в маршруте, невозможно удалить',
     err_remove_ends: 'Разрешается удалять только промежуточные станции',
@@ -13,6 +12,8 @@ class Route
   }.freeze
 
   attr_reader :stations
+
+  validate :stations, :each_type, Station
 
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
@@ -62,9 +63,7 @@ class Route
   private
 
   def validate!
-    unless stations.all? { |s| s.is_a?(Station) }
-      validation_fail!(MSG[:invalid_nodes])
-    end
+    super
 
     validation_fail!(MSG[:same_nodes]) if first_station == last_station
   end
