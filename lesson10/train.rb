@@ -1,5 +1,8 @@
 # Railroad train
 class Train
+  require_relative 'station.rb'
+  require_relative 'route.rb'
+
   include Manufacturer
   include InstanceCounter
   include Validation
@@ -37,6 +40,7 @@ class Train
     @speed = 0
     @carriages = []
     validate!
+    validation_fail!(MSG[:exists]) if self.class.find(number)
     self.class.objects << self
     register_instance
   end
@@ -115,11 +119,6 @@ class Train
 
   def right_type_of?(carriage)
     carriage.type == type
-  end
-
-  def validate!
-    super
-    validation_fail!(MSG[:exists]) if self.class.find(number)
   end
 
   def validate_running!
